@@ -291,6 +291,29 @@
   }
   .check-item.cancelled .cancelled-tag { display: inline-block; }
 
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #1e1a2e;
+    border: 1px solid rgba(255,60,172,0.4);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    padding: 12px 24px;
+    border-radius: 99px;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
+    z-index: 999;
+    white-space: nowrap;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
   /* ----- personajes flotantes ----- */
   .floater { position: fixed; pointer-events: none; z-index: 10; }
   .floater img { display: block; }
@@ -390,7 +413,7 @@
   <div class="counter-bar">
     <div>
       <div class="counter-label">misiones completadas</div>
-      <div class="counter-nums"><span id="done-count">0</span> / <span id="total-count">8</span></div>
+      <div class="counter-nums"><span id="done-count">0</span> / <span id="total-count">9</span></div>
     </div>
     <div class="progress-track">
       <div class="progress-fill" id="progress-fill"></div>
@@ -549,6 +572,21 @@
       </label>
     </li>
 
+    <!-- 09 · Kirby -->
+    <li class="check-item" id="item-8">
+      <label for="cb-8">
+        <input type="checkbox" id="cb-8" onchange="toggle(8)">
+        <div class="custom-check">
+          <svg class="checkmark" viewBox="0 0 14 14" fill="none">
+            <polyline points="2,7 5.5,11 12,3" stroke="#0d0b14" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="check-num">09</span>
+        <span class="check-text">Jugar un juego de Kirby</span>
+        <span class="check-emoji">🎮</span>
+      </label>
+    </li>
+
   </ul>
 
   <footer>
@@ -559,14 +597,15 @@
 <script>
   // ─────────────────────────────────────────────
   // (sin contar cancelados)
-  const TOTAL = 7;
+  const TOTAL = 9;
   // ─────────────────────────────────────────────
 
   const statuses = [
     'no llevamos nada xd',
     'por fin 1',
     'tsss ahí va, ahí va',
-    'ya la mitad',
+    'ya casi la mitad',
+    'se está lograndooooo',
     'no olvidar el de las motos',
     'ya casi',
     'ya casi casi xd',
@@ -578,11 +617,18 @@
   function toggle(idx) {
     const item = document.getElementById('item-' + idx);
     const cb   = document.getElementById('cb-' + idx);
-    item.classList.toggle('done', cb.checked);
-    item.classList.add('flash');
-    setTimeout(() => item.classList.remove('flash'), 500);
-    if (cb.checked) spawnSparkles(item);
-    updateCounter();
+
+    // revertir el check inmediatamente
+    cb.checked = !cb.checked;
+
+    // sacudir el item y mostrar mensaje
+    item.style.transition = 'transform 0.1s ease';
+    item.style.transform = 'translateX(8px)';
+    setTimeout(() => { item.style.transform = 'translateX(-6px)'; }, 100);
+    setTimeout(() => { item.style.transform = 'translateX(4px)'; },  200);
+    setTimeout(() => { item.style.transform = 'translateX(0)'; },    300);
+
+    showToast('⛔ no tienes permitido marcar planes');
   }
 
   function updateCounter() {
@@ -676,6 +722,20 @@
         Math.random() * window.innerHeight
       );
     }, i * 1200 + 800);
+  }
+
+  function showToast(msg) {
+    let t = document.getElementById('toast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'toast';
+      t.className = 'toast';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 2200);
   }
 
   // chispita en el cursor
